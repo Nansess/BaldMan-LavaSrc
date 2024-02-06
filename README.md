@@ -11,7 +11,7 @@ BaldMan LavaSrc is a fork with a simple goal: provide an alternative method to i
 
 ## Upcoming Plans
 
-- **Deezer ARL Support:** We're working on adding ARL support for Deezer, which will allow 1000kbps+ Playback, 320kbps, and the regular 120kbps
+- **Deezer ARL Support:** Im working on adding ARL support for Deezer, which will allow 1000kbps+ Playback, 320kbps, and the regular 120kbps
 
 ## Getting Started
 
