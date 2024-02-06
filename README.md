@@ -17,7 +17,8 @@ BaldMan LavaSrc is a fork with a simple goal: provide an alternative method to i
 
 Check out the example application file to understand the setup and diffrence from the Orginal LavaSrc
 
-```plugins:
+```
+plugins:
   lavasrc:
     providers: # Custom providers for track loading. This is the default
       # - "dzisrc:%ISRC%" # Deezer ISRC provider
@@ -41,6 +42,7 @@ Check out the example application file to understand the setup and diffrence fro
     deezer:
       masterDecryptionKey: "your master decryption key" # the master key used for decrypting the deezer tracks. (yes this is not here you need to get it from somewhere else)
     yandexmusic:
-      accessToken: "your access token" # the token used for accessing the yandex music api. See https://github.com/TopiSenpai/LavaSrc#yandex-music```
+      accessToken: "your access token" # the token used for accessing the yandex music api. See https://github.com/TopiSenpai/LavaSrc#yandex-music
+```
 
 Feel free to contribute, report issues, or share your feedback. All Credits Go To Topi (as this is a fork of LavaSrc(https://github.com/topi314/LavaSrc)
