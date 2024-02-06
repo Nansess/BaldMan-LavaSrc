@@ -24,7 +24,7 @@ public class LavaSrcPlugin implements AudioPlayerManagerConfiguration {
 	private final DeezerConfig deezerConfig;
 
 	public LavaSrcPlugin(LavaSrcConfig pluginConfig, SourcesConfig sourcesConfig, SpotifyConfig spotifyConfig, AppleMusicConfig appleMusicConfig, DeezerConfig deezerConfig, YandexMusicConfig yandexMusicConfig) {
-		log.info("Loading LavaSrc plugin...");
+		log.info("Loading a Bald Man LavaSrc Fork plugin...");
 		this.pluginConfig = pluginConfig;
 		this.sourcesConfig = sourcesConfig;
 		this.spotifyConfig = spotifyConfig;
@@ -37,7 +37,7 @@ public class LavaSrcPlugin implements AudioPlayerManagerConfiguration {
 	public AudioPlayerManager configure(AudioPlayerManager manager) {
 		if (this.sourcesConfig.isSpotify()) {
 			log.info("Registering Spotify audio source manager...");
-			var spotifySourceManager = new SpotifySourceManager(this.pluginConfig.getProviders(), this.spotifyConfig.getClientId(), this.spotifyConfig.getClientSecret(), this.spotifyConfig.getCountryCode(), manager);
+			var spotifySourceManager = new SpotifySourceManager(this.pluginConfig.getProviders(), this.spotifyConfig.getCountryCode(), manager);
 			if (this.spotifyConfig.getPlaylistLoadLimit() > 0) {
 				spotifySourceManager.setPlaylistPageLimit(this.spotifyConfig.getPlaylistLoadLimit());
 			}
