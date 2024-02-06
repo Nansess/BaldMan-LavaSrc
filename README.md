@@ -2,7 +2,7 @@
 
 ## Purpose
 
-BaldMan LavaSrc is a fork with a simple yet effective goal: provide an alternative method to interact with audio sources like Spotify and Apple Music without the hassle of managing API keys. The intent is to simplify the setup process for developers who prefer a straightforward approach to audio sourcing.
+BaldMan LavaSrc is a fork with a simple goal: provide an alternative method to interact with audio sources like Spotify and Apple Music without the pain of managing API keys and rate Limits. The intent is to simplify the setup process for developers who prefer a straightforward approach to using these platforms.
 
 ## Key Features
 
@@ -16,5 +16,31 @@ BaldMan LavaSrc is a fork with a simple yet effective goal: provide an alternati
 ## Getting Started
 
 Check out the example application file to understand the setup and diffrence from the Orginal LavaSrc
+
+```plugins:
+  lavasrc:
+    providers: # Custom providers for track loading. This is the default
+      # - "dzisrc:%ISRC%" # Deezer ISRC provider
+      # - "dzsearch:%QUERY%" # Deezer search provider
+      - "ytsearch:\"%ISRC%\"" # Will be ignored if track does not have an ISRC. See https://en.wikipedia.org/wiki/International_Standard_Recording_Code
+      - "ytsearch:%QUERY%" # Will be used if track has no ISRC or no track could be found for the ISRC
+      #  you can add multiple other fallback sources here
+    sources:
+      spotify: true # Enable Spotify source
+      applemusic: true # Enable Apple Music source
+      deezer: true # Enable Deezer source
+      yandexmusic: true # Enable Yandex Music source
+    spotify:
+      countryCode: "US" # the country code you want to use for filtering the artists top tracks. See https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
+      playlistLoadLimit: 6 # The number of pages at 100 tracks each
+      albumLoadLimit: 6 # The number of pages at 50 tracks each
+    applemusic:
+      countryCode: "US" # the country code you want to use for filtering the artists top tracks and language. See https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
+      playlistLoadLimit: 6 # The number of pages at 300 tracks each
+      albumLoadLimit: 6 # The number of pages at 300 tracks each
+    deezer:
+      masterDecryptionKey: "your master decryption key" # the master key used for decrypting the deezer tracks. (yes this is not here you need to get it from somewhere else)
+    yandexmusic:
+      accessToken: "your access token" # the token used for accessing the yandex music api. See https://github.com/TopiSenpai/LavaSrc#yandex-music```
 
 Feel free to contribute, report issues, or share your feedback. All Credits Go To Topi (as this is a fork of LavaSrc(https://github.com/topi314/LavaSrc)
