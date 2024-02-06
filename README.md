@@ -29,8 +29,8 @@ plugins:
     sources:
       spotify: true # Enable Spotify source
       applemusic: true # Enable Apple Music source
-      deezer: true # Enable Deezer source
-      yandexmusic: true # Enable Yandex Music source
+      deezer: false # Enable Deezer source
+      yandexmusic: false # Enable Yandex Music source
     spotify:
       countryCode: "US" # the country code you want to use for filtering the artists top tracks. See https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
       playlistLoadLimit: 6 # The number of pages at 100 tracks each
