@@ -42,7 +42,7 @@ public class LavaSrcPlugin
     YandexMusicConfig yandexMusicConfig,
     FloweryTTSConfig floweryTTSConfig
   ) {
-    log.info("Loading LavaSrc plugin...");
+    log.info("Loading BaldMan LavaSrc...");
 
     if (sourcesConfig.isSpotify()) {
       this.spotify =
