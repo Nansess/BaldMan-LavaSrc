@@ -77,8 +77,7 @@ public class LavaSrcPlugin
       }
     }
     if (sourcesConfig.isDeezer()) {
-      this.deezer =
-        new DeezerAudioSourceManager();
+      this.deezer = new DeezerAudioSourceManager();
     }
     if (sourcesConfig.isYandexMusic()) {
       this.yandexMusic =

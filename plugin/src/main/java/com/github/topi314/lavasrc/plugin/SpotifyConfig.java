@@ -7,50 +7,49 @@ import org.springframework.stereotype.Component;
 @Component
 public class SpotifyConfig {
 
-	private String clientId;
-	private String clientSecret;
-	private String countryCode;
-	private int playlistLoadLimit;
-	private int albumLoadLimit;
+  private String clientId;
+  private String clientSecret;
+  private String countryCode;
+  private int playlistLoadLimit;
+  private int albumLoadLimit;
 
-	public String getClientId() {
-		return this.clientId;
-	}
+  public String getClientId() {
+    return this.clientId;
+  }
 
-	public void setClientId(String clientId) {
-		this.clientId = clientId;
-	}
+  public void setClientId(String clientId) {
+    this.clientId = clientId;
+  }
 
-	public String getClientSecret() {
-		return this.clientSecret;
-	}
+  public String getClientSecret() {
+    return this.clientSecret;
+  }
 
-	public void setClientSecret(String clientSecret) {
-		this.clientSecret = clientSecret;
-	}
+  public void setClientSecret(String clientSecret) {
+    this.clientSecret = clientSecret;
+  }
 
-	public String getCountryCode() {
-		return this.countryCode;
-	}
+  public String getCountryCode() {
+    return this.countryCode;
+  }
 
-	public void setCountryCode(String countryCode) {
-		this.countryCode = countryCode;
-	}
+  public void setCountryCode(String countryCode) {
+    this.countryCode = countryCode;
+  }
 
-	public int getPlaylistLoadLimit() {
-		return this.playlistLoadLimit;
-	}
+  public int getPlaylistLoadLimit() {
+    return this.playlistLoadLimit;
+  }
 
-	public void setPlaylistLoadLimit(int playlistLoadLimit) {
-		this.playlistLoadLimit = playlistLoadLimit;
-	}
+  public void setPlaylistLoadLimit(int playlistLoadLimit) {
+    this.playlistLoadLimit = playlistLoadLimit;
+  }
 
-	public int getAlbumLoadLimit() {
-		return this.albumLoadLimit;
-	}
+  public int getAlbumLoadLimit() {
+    return this.albumLoadLimit;
+  }
 
-	public void setAlbumLoadLimit(int albumLoadLimit) {
-		this.albumLoadLimit = albumLoadLimit;
-	}
-
+  public void setAlbumLoadLimit(int albumLoadLimit) {
+    this.albumLoadLimit = albumLoadLimit;
+  }
 }
