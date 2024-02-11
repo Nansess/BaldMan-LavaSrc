@@ -514,7 +514,7 @@ public class SpotifySourceManager
 
       for (var value : page.get("items").values()) {
         var track = value.get("track");
-        if (Objects.nonNull(track) && !track.get("is_local").asBoolean()) {
+        if (Objects.nonNull(track) && !track.get("is_local").asBoolean(false)) {
           tracks.add(this.parseTrack(track, preview));
         }
       }
