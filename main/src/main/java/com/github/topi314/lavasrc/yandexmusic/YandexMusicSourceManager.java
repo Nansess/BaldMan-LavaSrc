@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -203,6 +204,7 @@ public class YandexMusicSourceManager
       this.getJson(
           PUBLIC_API_BASE + "/users/" + userString + "/playlists/" + id
         );
+
     if (
       json.isNull() ||
       json.get("result").isNull() ||
@@ -210,21 +212,45 @@ public class YandexMusicSourceManager
     ) {
       return AudioReference.NO_TRACK;
     }
+
+    JsonBrowser tracksJson = json.get("result").get("tracks");
+
+    // Check if it's not empty and has more than one element
+    if (
+      tracksJson.values().size() > 0 &&
+      tracksJson.index(0).get("track").isNull()
+    ) {
+      var trackIds = tracksJson
+        .values()
+        .stream()
+        .map(track -> track.get("track").get("id").text())
+        .collect(Collectors.joining(","));
+
+      var trackDetailsJson =
+        this.getJson(PUBLIC_API_BASE + "/tracks?trackIds=" + trackIds);
+
+      tracksJson = trackDetailsJson.get("result");
+    }
+
     var tracks = new ArrayList<AudioTrack>();
-    for (var track : json.get("result").get("tracks").values()) {
+
+    for (var track : tracksJson.values()) {
       var parsedTrack = this.parseTrack(track.get("track"));
       if (parsedTrack != null) {
         tracks.add(parsedTrack);
       }
     }
+
     if (tracks.isEmpty()) {
       return AudioReference.NO_TRACK;
     }
+
     var playlistTitle = json.get("result").get("kind").text().equals("3")
       ? "Liked songs"
       : json.get("result").get("title").text();
     var coverUri = json.get("result").get("cover").get("uri").text();
     var author = json.get("result").get("owner").get("name").text();
+
     return new YandexMusicAudioPlaylist(
       playlistTitle,
       tracks,
