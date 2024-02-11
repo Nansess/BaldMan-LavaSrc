@@ -488,9 +488,11 @@ public class SpotifySourceManager
   }
 
   public AudioItem getPlaylist(String id, boolean preview) throws IOException {
-    var json = Objects.requireNonNull(this.getJson(API_BASE + "playlists/" + id));
+    var json = Objects.requireNonNull(
+      this.getJson(API_BASE + "playlists/" + id)
+    );
     if (json == null) {
-        return AudioReference.NO_TRACK;
+      return AudioReference.NO_TRACK;
     }
 
     var tracks = new ArrayList<AudioTrack>();
@@ -498,40 +500,42 @@ public class SpotifySourceManager
     var offset = 0;
     var pages = 0;
     do {
-        page = this.getJson(
-                API_BASE +
-                        "playlists/" +
-                        id +
-                        "/tracks?limit=" +
-                        PLAYLIST_MAX_PAGE_ITEMS +
-                        "&offset=" +
-                        offset
-        );
-        offset += PLAYLIST_MAX_PAGE_ITEMS;
+      page =
+        this.getJson(
+            API_BASE +
+            "playlists/" +
+            id +
+            "/tracks?limit=" +
+            PLAYLIST_MAX_PAGE_ITEMS +
+            "&offset=" +
+            offset
+          );
+      offset += PLAYLIST_MAX_PAGE_ITEMS;
 
-        for (var value : page.get("items").values()) {
-            var track = value.get("track");
-            if (Objects.nonNull(track) && !track.get("is_local").asBoolean()) {
-                tracks.add(this.parseTrack(track, preview));
-            }
+      for (var value : page.get("items").values()) {
+        var track = value.get("track");
+        if (Objects.nonNull(track) && !track.get("is_local").asBoolean()) {
+          tracks.add(this.parseTrack(track, preview));
         }
-    } while (page.get("next").text() != null && ++pages < this.playlistPageLimit);
+      }
+    } while (
+      page.get("next").text() != null && ++pages < this.playlistPageLimit
+    );
 
     if (tracks.isEmpty()) {
-        return AudioReference.NO_TRACK;
+      return AudioReference.NO_TRACK;
     }
 
     return new SpotifyAudioPlaylist(
-            json.get("name").text(),
-            tracks,
-            ExtendedAudioPlaylist.Type.PLAYLIST,
-            json.get("external_urls").get("spotify").text(),
-            json.get("images").index(0).get("url").text(),
-            json.get("owner").get("display_name").text(),
-            (int) json.get("tracks").get("total").asLong(0)
+      json.get("name").text(),
+      tracks,
+      ExtendedAudioPlaylist.Type.PLAYLIST,
+      json.get("external_urls").get("spotify").text(),
+      json.get("images").index(0).get("url").text(),
+      json.get("owner").get("display_name").text(),
+      (int) json.get("tracks").get("total").asLong(0)
     );
-}
-
+  }
 
   public AudioItem getArtist(String id, boolean preview) throws IOException {
     var json = this.getJson(API_BASE + "artists/" + id);
