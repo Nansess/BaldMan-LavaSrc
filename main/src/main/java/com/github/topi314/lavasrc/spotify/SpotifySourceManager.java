@@ -488,9 +488,7 @@ public class SpotifySourceManager
   }
 
   public AudioItem getPlaylist(String id, boolean preview) throws IOException {
-    var json = Objects.requireNonNull(
-      this.getJson(API_BASE + "playlists/" + id)
-    );
+    var json = this.getJson(API_BASE + "playlists/" + id);
     if (json == null) {
       return AudioReference.NO_TRACK;
     }
@@ -514,11 +512,10 @@ public class SpotifySourceManager
 
       for (var value : page.get("items").values()) {
         var track = value.get("track");
-if (track.isNull() || track.get("is_local").asBoolean(false)) {
-					continue;
-				}
-				tracks.add(this.parseTrack(track, preview));
+        if (track.isNull() || track.get("is_local").asBoolean(false)) {
+          continue;
         }
+        tracks.add(this.parseTrack(track, preview));
       }
     } while (
       page.get("next").text() != null && ++pages < this.playlistPageLimit
