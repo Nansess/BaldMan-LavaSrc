@@ -2,6 +2,7 @@ package com.github.topi314.lavasrc.deezer;
 
 import com.github.topi314.lavasrc.ExtendedAudioTrack;
 import com.github.topi314.lavasrc.LavaSrcTools;
+import com.sedmelluq.discord.lavaplayer.container.flac.FlacAudioTrack;
 import com.sedmelluq.discord.lavaplayer.container.mp3.Mp3AudioTrack;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
@@ -17,8 +18,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.stream.Collectors;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 
@@ -55,25 +56,25 @@ public class DeezerAudioTrack extends ExtendedAudioTrack {
     this.sourceManager = sourceManager;
   }
 
-private URI getTrackMediaURI() throws IOException, URISyntaxException {
+  private URI getTrackMediaURI() throws IOException, URISyntaxException {
     var getMediaURL = new HttpGet(
-            "https://api.nansess.com/getMediaURL" +
-                    "?trackIdentifier=" + this.trackInfo.identifier +
-                    "&format=MP3_320"
+      "https://api.nansess.com/getMediaURL" +
+      "?trackIdentifier=" +
+      this.trackInfo.identifier +
+      "&format=" +
+      this.sourceManager.getFormat()
     );
 
     var json = LavaSrcTools.fetchResponseAsJson(
-            this.sourceManager.getHttpInterface(),
-            getMediaURL
+      this.sourceManager.getHttpInterface(),
+      getMediaURL
     );
 
     this.checkResponse(json, "Failed to get media URL: ");
 
     String mediaUrl = json.get("mediaURL").text();
     return new URI(mediaUrl);
-}
-
-
+  }
 
   private void checkResponse(JsonBrowser json, String message)
     throws IllegalStateException {
@@ -110,34 +111,80 @@ private URI getTrackMediaURI() throws IOException, URISyntaxException {
 
   @Override
   public void process(LocalAudioTrackExecutor executor) throws Exception {
+    String trackFormat = this.sourceManager.getFormat();
+
     try (var httpInterface = this.sourceManager.getHttpInterface()) {
-      if (this.isPreview) {
-        if (this.previewUrl == null) {
-          throw new FriendlyException(
-            "No preview url found",
-            FriendlyException.Severity.COMMON,
-            new IllegalArgumentException()
-          );
-        }
-        try (
-          var stream = new PersistentHttpStream(
-            httpInterface,
-            new URI(this.previewUrl),
-            this.trackInfo.length
-          )
-        ) {
-          processDelegate(new Mp3AudioTrack(this.trackInfo, stream), executor);
+      if (!trackFormat.equalsIgnoreCase("FLAC")) {
+        if (this.isPreview) {
+          if (this.previewUrl == null) {
+            throw new FriendlyException(
+              "No preview url found",
+              FriendlyException.Severity.COMMON,
+              new IllegalArgumentException()
+            );
+          }
+          try (
+            var stream = new PersistentHttpStream(
+              httpInterface,
+              new URI(this.previewUrl),
+              this.trackInfo.length
+            )
+          ) {
+            processDelegate(
+              new Mp3AudioTrack(this.trackInfo, stream),
+              executor
+            );
+          }
+        } else {
+          try (
+            var stream = new DeezerPersistentHttpStream(
+              httpInterface,
+              this.getTrackMediaURI(),
+              this.trackInfo.length,
+              this.getTrackDecryptionKey()
+            )
+          ) {
+            processDelegate(
+              new Mp3AudioTrack(this.trackInfo, stream),
+              executor
+            );
+          }
         }
       } else {
-        try (
-          var stream = new DeezerPersistentHttpStream(
-            httpInterface,
-            this.getTrackMediaURI(),
-            this.trackInfo.length,
-            this.getTrackDecryptionKey()
-          )
-        ) {
-          processDelegate(new Mp3AudioTrack(this.trackInfo, stream), executor);
+        if (this.isPreview) {
+          if (this.previewUrl == null) {
+            throw new FriendlyException(
+              "No preview url found",
+              FriendlyException.Severity.COMMON,
+              new IllegalArgumentException()
+            );
+          }
+          try (
+            var stream = new PersistentHttpStream(
+              httpInterface,
+              new URI(this.previewUrl),
+              this.trackInfo.length
+            )
+          ) {
+            processDelegate(
+              new FlacAudioTrack(this.trackInfo, stream),
+              executor
+            );
+          }
+        } else {
+          try (
+            var stream = new DeezerPersistentHttpStream(
+              httpInterface,
+              this.getTrackMediaURI(),
+              this.trackInfo.length,
+              this.getTrackDecryptionKey()
+            )
+          ) {
+            processDelegate(
+              new FlacAudioTrack(this.trackInfo, stream),
+              executor
+            );
+          }
         }
       }
     }

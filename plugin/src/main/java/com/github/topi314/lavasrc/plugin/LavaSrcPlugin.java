@@ -76,9 +76,9 @@ public class LavaSrcPlugin
         appleMusic.setAlbumPageLimit(appleMusicConfig.getAlbumLoadLimit());
       }
     }
-    if (sourcesConfig.isDeezer()) {
-      this.deezer = new DeezerAudioSourceManager();
-    }
+if (sourcesConfig.isDeezer()) {
+  this.deezer = new DeezerAudioSourceManager(deezerConfig.getFormat());
+}
     if (sourcesConfig.isYandexMusic()) {
       this.yandexMusic =
         new YandexMusicSourceManager(yandexMusicConfig.getAccessToken());
