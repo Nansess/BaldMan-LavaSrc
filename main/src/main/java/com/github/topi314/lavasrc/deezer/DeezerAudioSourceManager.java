@@ -57,17 +57,18 @@ public class DeezerAudioSourceManager
   private static final Logger log = LoggerFactory.getLogger(
     DeezerAudioSourceManager.class
   );
-	private final String getFormat;
+  private final String getFormat;
   private final String masterDecryptionKey = "g4el58wc0zvf9na1";
   private final HttpInterfaceManager httpInterfaceManager;
 
-public DeezerAudioSourceManager(String getFormat) {
-  if (getFormat == null || getFormat.isEmpty()) {
-    throw new IllegalArgumentException("Deezer format must be set");
+  public DeezerAudioSourceManager(String getFormat) {
+    if (getFormat == null || getFormat.isEmpty()) {
+      throw new IllegalArgumentException("Deezer format must be set");
+    }
+    this.getFormat = getFormat;
+    this.httpInterfaceManager =
+      HttpClientTools.createDefaultThreadLocalManager();
   }
-  this.getFormat = getFormat;
-  this.httpInterfaceManager = HttpClientTools.createDefaultThreadLocalManager();
-}
 
   @NotNull
   @Override
@@ -196,29 +197,12 @@ public DeezerAudioSourceManager(String getFormat) {
       if (!track.get("type").text().equals("track")) {
         continue;
       }
-      if (!track.get("readable").as(Boolean.class)) {
-        log.warn(
-          "Skipping track {} by {} because it is not readable. Available countries: {}",
-          track.get("title").text(),
-          track.get("artist").get("name").text(),
-          track.get("available_countries").text()
-        );
-        continue;
-      }
       tracks.add(this.parseTrack(track, preview));
     }
     return tracks;
   }
 
   private AudioTrack parseTrack(JsonBrowser json, boolean preview) {
-    if (!json.get("readable").as(Boolean.class)) {
-      throw new FriendlyException(
-        "This track is not readable. Available countries: " +
-        json.get("available_countries").text(),
-        FriendlyException.Severity.COMMON,
-        null
-      );
-    }
     var id = json.get("id").text();
     return new DeezerAudioTrack(
       new AudioTrackInfo(
@@ -469,9 +453,10 @@ public DeezerAudioSourceManager(String getFormat) {
   public String getMasterDecryptionKey() {
     return this.masterDecryptionKey;
   }
-public String getFormat() {
-  return this.getFormat;
-}
+
+  public String getFormat() {
+    return this.getFormat;
+  }
 
   public HttpInterface getHttpInterface() {
     return this.httpInterfaceManager.getInterface();
