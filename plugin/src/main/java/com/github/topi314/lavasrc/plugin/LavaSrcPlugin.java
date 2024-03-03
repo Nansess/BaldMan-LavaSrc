@@ -5,7 +5,9 @@ import com.github.topi314.lavasearch.api.SearchManagerConfiguration;
 import com.github.topi314.lavasrc.applemusic.AppleMusicSourceManager;
 import com.github.topi314.lavasrc.deezer.DeezerAudioSourceManager;
 import com.github.topi314.lavasrc.flowerytts.FloweryTTSSourceManager;
+import com.github.topi314.lavasrc.sliderkz.SliderKzSourceManager;
 import com.github.topi314.lavasrc.spotify.SpotifySourceManager;
+import com.github.topi314.lavasrc.tidal.TidalSourceManager;
 import com.github.topi314.lavasrc.yandexmusic.YandexMusicSourceManager;
 import com.github.topi314.lavasrc.youtube.YoutubeSearchManager;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
@@ -32,11 +34,14 @@ public class LavaSrcPlugin
   private YandexMusicSourceManager yandexMusic;
   private FloweryTTSSourceManager flowerytts;
   private YoutubeSearchManager youtube;
+  private SliderKzSourceManager sliderkz;
+  private TidalSourceManager tidal;
 
   public LavaSrcPlugin(
     LavaSrcConfig pluginConfig,
     SourcesConfig sourcesConfig,
     SpotifyConfig spotifyConfig,
+    TidalConfig tidalConfig,
     AppleMusicConfig appleMusicConfig,
     DeezerConfig deezerConfig,
     YandexMusicConfig yandexMusicConfig,
@@ -58,6 +63,17 @@ public class LavaSrcPlugin
         this.spotify.setAlbumPageLimit(spotifyConfig.getAlbumLoadLimit());
       }
     }
+if (sourcesConfig.isTidal()) {
+    this.tidal =
+        new TidalSourceManager(
+            pluginConfig.getProviders(),
+            tidalConfig.getCountryCode(),
+            unused -> manager
+        );
+    if (tidalConfig.getSearchLimit() > 0) {
+        this.tidal.setSearchLimit(tidalConfig.getSearchLimit());
+    }
+}
 
     if (sourcesConfig.isAppleMusic()) {
       this.appleMusic =
@@ -76,9 +92,12 @@ public class LavaSrcPlugin
         appleMusic.setAlbumPageLimit(appleMusicConfig.getAlbumLoadLimit());
       }
     }
-if (sourcesConfig.isDeezer()) {
-  this.deezer = new DeezerAudioSourceManager(deezerConfig.getFormat());
-}
+    if (sourcesConfig.isDeezer()) {
+      this.deezer = new DeezerAudioSourceManager(deezerConfig.getFormat());
+    }
+    if (sourcesConfig.isSliderkz()) {
+      this.sliderkz = new SliderKzSourceManager();
+    }
     if (sourcesConfig.isYandexMusic()) {
       this.yandexMusic =
         new YandexMusicSourceManager(yandexMusicConfig.getAccessToken());
@@ -120,6 +139,10 @@ if (sourcesConfig.isDeezer()) {
       log.info("Registering Deezer audio source manager...");
       manager.registerSourceManager(this.deezer);
     }
+    if (this.tidal != null) {
+      log.info("Registering Tidal audio source manager...");
+      manager.registerSourceManager(this.tidal);
+    }
     if (this.yandexMusic != null) {
       log.info("Registering Yandex Music audio source manager...");
       manager.registerSourceManager(this.yandexMusic);
@@ -127,6 +150,10 @@ if (sourcesConfig.isDeezer()) {
     if (this.flowerytts != null) {
       log.info("Registering Flowery TTS audio source manager...");
       manager.registerSourceManager(this.flowerytts);
+    }
+    if (this.sliderkz != null) {
+      log.info("Registering SliderKzMusic audio source manager...");
+      manager.registerSourceManager(this.sliderkz);
     }
     if (this.youtube != null) {
       this.youtubeAudioSourceManager =

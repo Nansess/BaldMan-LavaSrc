@@ -13,6 +13,9 @@ public class SourcesConfig {
   private boolean yandexMusic = false;
   private boolean floweryTTS = false;
   private boolean youtube = false;
+  private boolean sliderkz = false;
+  private boolean tidal = false;
+
 
   public boolean isSpotify() {
     return this.spotify;
@@ -20,6 +23,13 @@ public class SourcesConfig {
 
   public void setSpotify(boolean spotify) {
     this.spotify = spotify;
+  }
+  public boolean isTidal() {
+    return this.tidal;
+  }
+
+  public void setTidal(boolean tidal) {
+    this.tidal = tidal;
   }
 
   public boolean isAppleMusic() {
@@ -61,4 +71,12 @@ public class SourcesConfig {
   public void setYoutube(boolean youtube) {
     this.youtube = youtube;
   }
+  
+  public boolean isSliderkz() {
+        return this.sliderkz;
+    }
+
+    public void setSliderkz(boolean sliderkz) {
+        this.sliderkz = sliderkz;
+    }
 }
