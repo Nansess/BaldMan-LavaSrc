@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -44,6 +43,9 @@ public class TidalSourceManager
   public static final String PUBLIC_API_BASE = "https://api.tidal.com/v1/";
   public static final int PLAYLIST_MAX_PAGE_ITEMS = 750;
   public static final int ALBUM_MAX_PAGE_ITEMS = 120;
+  private static final String USER_AGENT =
+    "TIDAL/3704 CFNetwork/1220.1 Darwin/20.3.0";
+  private static final String TIDAL_TOKEN = "i4ZDjcyhed7Mu47q";
 
   private static final Logger log = LoggerFactory.getLogger(
     TidalSourceManager.class
@@ -140,11 +142,11 @@ public class TidalSourceManager
 
         switch (type) {
           case "album":
-            return getAlbum(id);
+            return getAlbumOrPlaylist(id, "album", ALBUM_MAX_PAGE_ITEMS);
           case "track":
             return getTrack(id);
           case "playlist":
-            return getPlaylist(id);
+            return getAlbumOrPlaylist(id, "playlist", PLAYLIST_MAX_PAGE_ITEMS);
           default:
             return null;
         }
@@ -162,6 +164,27 @@ public class TidalSourceManager
     return null;
   }
 
+  private JsonBrowser getApiResponse(String apiUrl) throws IOException {
+    var request = new HttpGet(apiUrl);
+    request.setHeader("user-agent", USER_AGENT);
+    request.setHeader("x-tidal-token", TIDAL_TOKEN);
+    return LavaSrcTools.fetchResponseAsJson(
+      httpInterfaceManager.getInterface(),
+      request
+    );
+  }
+
+  private List<AudioTrack> parseTracks(JsonBrowser json) {
+    var tracks = new ArrayList<AudioTrack>();
+    for (var audio : json.values()) {
+      var parsedTrack = parseTrack(audio);
+      if (parsedTrack != null) {
+        tracks.add(parsedTrack);
+      }
+    }
+    return tracks;
+  }
+
   private AudioItem getSearchWithRetry(String query, int maxRetries)
     throws IOException {
     for (int retry = 0; retry <= maxRetries; retry++) {
@@ -174,19 +197,7 @@ public class TidalSourceManager
           searchLimit +
           "&countryCode=" +
           countryCode;
-
-        log.info(
-          "Attempting search (Retry " +
-          (retry + 1) +
-          " of " +
-          (maxRetries + 1) +
-          "): " +
-          query
-        );
-
-        var json = this.getJson(apiUrl);
-
-        log.info("API Response:\n" + json.toString());
+        var json = getApiResponse(apiUrl);
 
         if (
           json.isNull() ||
@@ -194,18 +205,15 @@ public class TidalSourceManager
           json.get("tracks").get("items").isNull() ||
           json.get("tracks").get("items").text().isEmpty()
         ) {
-          log.info("Search result is empty.");
           return AudioReference.NO_TRACK;
         }
 
         var tracks = parseTracks(json.get("tracks").get("items"));
 
         if (tracks.isEmpty()) {
-          log.info("No tracks found in the search result.");
           return AudioReference.NO_TRACK;
         }
 
-        log.info("Search successful. Found " + tracks.size() + " track(s).");
         return new BasicAudioPlaylist(
           "Tidal Music Search: " + query,
           tracks,
@@ -213,15 +221,7 @@ public class TidalSourceManager
           true
         );
       } catch (SocketTimeoutException e) {
-        log.info(
-          "Retry " +
-          (retry + 1) +
-          " of " +
-          (maxRetries + 1) +
-          ": Socket timeout"
-        );
         if (retry == maxRetries) {
-          log.info("All retries failed. Giving up.");
           return AudioReference.NO_TRACK;
         }
       }
@@ -231,171 +231,7 @@ public class TidalSourceManager
 
   private AudioItem getSearch(String query) throws IOException {
     int maxRetries = 2;
-    log.info("Initiating search: " + query);
     return getSearchWithRetry(query, maxRetries);
-  }
-
-public AudioItem getTrack(String trackId) throws IOException {
-    try {
-        String apiUrl = PUBLIC_API_BASE + "tracks/" + trackId + "?countryCode=" + countryCode;
-        var json = getJson(apiUrl);
-
-        if (json == null || json.isNull()) {
-            log.info("Track not found for ID: {}", trackId);
-            return AudioReference.NO_TRACK;
-        }
-
-        var track = parseTrack(json);
-
-        if (track == null) {
-            log.info("Failed to parse track for ID: {}", trackId);
-            return AudioReference.NO_TRACK;
-        }
-
-        log.info("Track loaded successfully for ID: {}", trackId);
-        return track;
-    } catch (SocketTimeoutException e) {
-        log.error("Socket timeout while fetching track with ID: {}", trackId, e);
-        return AudioReference.NO_TRACK;
-    }
-}
-
-
-private AudioItem getAlbum(String albumId) throws IOException {
-    try {
-        String apiUrl =
-            PUBLIC_API_BASE +
-            "albums/" +
-            albumId +
-            "/tracks?countryCode=" +
-            countryCode +
-            "&limit=" +
-            ALBUM_MAX_PAGE_ITEMS;  
-        var json = getJson(apiUrl);
-
-      if (json == null || json.get("items").isNull()) {
-        log.info("Tracks not found for Album ID: {}", albumId);
-        return AudioReference.NO_TRACK;
-      }
-
-      var albumTracks = parseAlbum(json);
-      if (albumTracks.isEmpty()) {
-        log.info("No tracks found for Album ID: {}", albumId);
-        return AudioReference.NO_TRACK;
-      }
-
-      var albumTitle = json
-        .get("items")
-        .index(0)
-        .get("album")
-        .get("title")
-        .text();
-      var artist = json
-        .get("items")
-        .index(0)
-        .get("artists")
-        .index(0)
-        .get("name")
-        .text();
-
-      return new BasicAudioPlaylist(
-        albumTitle,
-        albumTracks,
-        null,
-        false 
-      );
-    } catch (SocketTimeoutException e) {
-      log.error(
-        "Socket timeout while fetching tracks for Album ID: {}",
-        albumId,
-        e
-      );
-      return AudioReference.NO_TRACK;
-    }
-  }
-
-  private AudioItem getPlaylist(String playlistId) throws IOException {
-    try {
-      String playlistInfoUrl =
-        PUBLIC_API_BASE +
-        "playlists/" +
-        playlistId +
-        "?countryCode=" +
-        countryCode;
-      var playlistInfoJson = getJson(playlistInfoUrl);
-
-      if (
-        playlistInfoJson == null ||
-        playlistInfoJson.get("numberOfTracks").isNull()
-      ) {
-        log.info("Playlist not found for ID: {}", playlistId);
-        return AudioReference.NO_TRACK;
-      }
-
-      var playlistTitle = playlistInfoJson.get("title").text();
-
-String playlistTracksUrl =
-            PUBLIC_API_BASE +
-            "playlists/" +
-            playlistId +
-            "/tracks?countryCode=" +
-            countryCode +
-            "&limit=" +
-            PLAYLIST_MAX_PAGE_ITEMS;
-      var playlistTracksJson = getJson(playlistTracksUrl);
-
-      if (
-        playlistTracksJson == null || playlistTracksJson.get("items").isNull()
-      ) {
-        log.info("Tracks not found for Playlist ID: {}", playlistId);
-        return AudioReference.NO_TRACK;
-      }
-
-      var playlistTracks = parsePlaylist(playlistTracksJson);
-      if (playlistTracks.isEmpty()) {
-        log.info("No tracks found for Playlist ID: {}", playlistId);
-        return AudioReference.NO_TRACK;
-      }
-
-      return new BasicAudioPlaylist(
-        playlistTitle,
-        playlistTracks,
-        null, 
-        false 
-      );
-    } catch (SocketTimeoutException e) {
-      log.error(
-        "Socket timeout while fetching playlist for ID: {}",
-        playlistId,
-        e
-      );
-      return AudioReference.NO_TRACK;
-    }
-  }
-
-  public JsonBrowser getJson(String uri) throws IOException {
-    var request = new HttpGet(uri);
-    request.setHeader(
-      "user-agent",
-      "TIDAL/3704 CFNetwork/1220.1 Darwin/20.3.0"
-    );
-    request.setHeader("x-tidal-token", "i4ZDjcyhed7Mu47q");
-    JsonBrowser json = LavaSrcTools.fetchResponseAsJson(
-      httpInterfaceManager.getInterface(),
-      request
-    );
-    return json;
-  }
-
-  private List<AudioTrack> parseTracks(JsonBrowser json) {
-    var tracks = new ArrayList<AudioTrack>();
-    for (var audio : json.values()) {
-      var parsedTrack = parseTrack(audio);
-      if (parsedTrack != null) {
-        tracks.add(parsedTrack);
-      }
-    }
-    return tracks;
   }
 
   private AudioTrack parseTrack(JsonBrowser audio) {
@@ -431,21 +267,7 @@ String playlistTracksUrl =
         "https://resources.tidal.com/images/" +
         formattedCoverIdentifier +
         "/1280x1280.jpg";
-
-      log.info("Audio JSON: {}", audio);
-
-      log.info(
-        "Parsed track: Title={}, Artist={}, Duration={}, OriginalUrl={}, ArtWorkURL={}, ID={}, ISRC={}",
-        title,
-        artistName,
-        duration,
-        originalUrl,
-        artworkUrl,
-        id,
-        isrc
-      );
-
-      var audioTrack = new TidalAudioTrack(
+      return new TidalAudioTrack(
         new AudioTrackInfo(
           title,
           artistName,
@@ -458,8 +280,6 @@ String playlistTracksUrl =
         ),
         this
       );
-      log.info("Created AudioTrack: {}", audioTrack);
-      return audioTrack;
     } catch (NumberFormatException e) {
       log.error(
         "Error parsing duration for track. Audio JSON: {}",
@@ -470,164 +290,180 @@ String playlistTracksUrl =
     }
   }
 
-  private List<AudioTrack> parseAlbum(JsonBrowser album) {
-    var tracks = new ArrayList<AudioTrack>();
-    var items = album.get("items");
+  private AudioItem getAlbumOrPlaylist(
+    String itemId,
+    String type,
+    int maxPageItems
+  ) throws IOException {
+    try {
+      // Fetch tracks directly for albums
+      String apiUrl =
+        PUBLIC_API_BASE +
+        type +
+        "s/" +
+        itemId +
+        "/tracks?countryCode=" +
+        countryCode +
+        "&limit=" +
+        maxPageItems;
+      var json = getApiResponse(apiUrl);
 
-    for (var item : items.values()) {
-      var id = item.get("id").text();
-      var rawDuration = item.get("duration").text();
-
-      if (rawDuration == null) {
-        log.warn(
-          "Skipping track with null duration. Track JSON: {}",
-          item.toString()
-        );
-        continue;
+      if (json == null || json.get("items").isNull()) {
+        return AudioReference.NO_TRACK;
       }
 
-      try {
-        var duration = Long.parseLong(rawDuration) * 1000;
+      var items = parseTrackItem(json);
 
-        var title = item.get("title").text();
-        var originalUrl = item.get("url").text();
-        var artistsArray = item.get("artists");
-        var artistName = "";
+      if (items.isEmpty()) {
+        return AudioReference.NO_TRACK;
+      }
 
-        for (int i = 0; i < artistsArray.values().size(); i++) {
-          var currentArtistName = artistsArray.index(i).get("name").text();
-          artistName += (i > 0 ? ", " : "") + currentArtistName;
+      // Use playlist title for playlists and album title for albums
+      String itemTitle = "";
+      if (type.equalsIgnoreCase("playlist")) {
+        // Fetch playlist information
+        String playlistInfoUrl =
+          PUBLIC_API_BASE +
+          "playlists/" +
+          itemId +
+          "?countryCode=" +
+          countryCode;
+        var playlistInfoJson = getApiResponse(playlistInfoUrl);
+
+        if (
+          playlistInfoJson != null && !playlistInfoJson.get("title").isNull()
+        ) {
+          itemTitle = playlistInfoJson.get("title").text();
         }
+      } else if (type.equalsIgnoreCase("album")) {
+        // Fetch album information
+        String albumInfoUrl =
+          PUBLIC_API_BASE + "albums/" + itemId + "?countryCode=" + countryCode;
+        var albumInfoJson = getApiResponse(albumInfoUrl);
 
-        var coverIdentifier = item.get("album").get("cover").text();
-        var isrc = item.get("isrc").text();
+        if (albumInfoJson != null && !albumInfoJson.get("title").isNull()) {
+          itemTitle = albumInfoJson.get("title").text();
+        }
+      }
 
-        var formattedCoverIdentifier = coverIdentifier.replaceAll("-", "/");
+      return new BasicAudioPlaylist(itemTitle, items, null, false);
+    } catch (SocketTimeoutException e) {
+      log.error(
+        "Socket timeout while fetching tracks for {} ID: {}",
+        type,
+        itemId,
+        e
+      );
+      return AudioReference.NO_TRACK;
+    }
+  }
 
-        var artworkUrl =
-          "https://resources.tidal.com/images/" +
-          formattedCoverIdentifier +
-          "/1280x1280.jpg";
+  public AudioItem getTrack(String trackId) throws IOException {
+    try {
+      String apiUrl =
+        PUBLIC_API_BASE + "tracks/" + trackId + "?countryCode=" + countryCode;
+      var json = getApiResponse(apiUrl);
 
-        log.info("Track JSON: {}", item);
+      if (json == null || json.isNull()) {
+        log.info("Track not found for ID: {}", trackId);
+        return AudioReference.NO_TRACK;
+      }
 
-        log.info(
-          "Parsed track: Title={}, Artist={}, Duration={}, OriginalUrl={}, ArtWorkURL={}, ID={}, ISRC={}",
-          title,
-          artistName,
-          duration,
-          originalUrl,
-          artworkUrl,
-          id,
-          isrc
-        );
+      var track = parseTrack(json);
 
-        var audioTrack = new TidalAudioTrack(
-          new AudioTrackInfo(
-            title,
-            artistName,
-            duration,
-            id,
-            false,
-            originalUrl,
-            artworkUrl,
-            isrc
-          ),
-          this
-        );
+      if (track == null) {
+        log.info("Failed to parse track for ID: {}", trackId);
+        return AudioReference.NO_TRACK;
+      }
 
-        log.info("Created AudioTrack: {}", audioTrack);
-        tracks.add(audioTrack);
-      } catch (NumberFormatException e) {
-        log.error(
-          "Error parsing duration for track. Track JSON: {}",
-          item.toString(),
-          e
-        );
+      log.info("Track loaded successfully for ID: {}", trackId);
+      return track;
+    } catch (SocketTimeoutException e) {
+      log.error("Socket timeout while fetching track with ID: {}", trackId, e);
+      return AudioReference.NO_TRACK;
+    }
+  }
+
+  private List<AudioTrack> parseSingleTrack(JsonBrowser audio) {
+    var tracks = new ArrayList<AudioTrack>();
+    var items = audio.get("items");
+
+    for (var audioItem : items.values()) {
+      var parsedTrack = parseItem(audioItem);
+      if (parsedTrack != null) {
+        tracks.add(parsedTrack);
       }
     }
-
     return tracks;
   }
 
-  private List<AudioTrack> parsePlaylist(JsonBrowser playlist) {
+  private List<AudioTrack> parseTrackItem(JsonBrowser json) {
     var tracks = new ArrayList<AudioTrack>();
-    var items = playlist.get("items");
+    var items = json.get("items");
 
-    for (var item : items.values()) {
-      var id = item.get("id").text();
-      var rawDuration = item.get("duration").text();
-
-      if (rawDuration == null) {
-        log.warn(
-          "Skipping track with null duration. Track JSON: {}",
-          item.toString()
-        );
-        continue;
+    for (var audio : items.values()) {
+      var parsedTrack = parseItem(audio);
+      if (parsedTrack != null) {
+        tracks.add(parsedTrack);
       }
+    }
+    return tracks;
+  }
 
-      try {
-        var duration = Long.parseLong(rawDuration) * 1000;
+  private AudioTrack parseItem(JsonBrowser audio) {
+    var id = audio.get("id").text();
+    var rawDuration = audio.get("duration").text();
 
-        var title = item.get("title").text();
-        var originalUrl = item.get("url").text();
-        var artistsArray = item.get("artists");
-        var artistName = "";
+    if (rawDuration == null) {
+      log.warn(
+        "Skipping track with null duration. Audio JSON: {}",
+        audio.toString()
+      );
+      return null;
+    }
 
-        for (int i = 0; i < artistsArray.values().size(); i++) {
-          var currentArtistName = artistsArray.index(i).get("name").text();
-          artistName += (i > 0 ? ", " : "") + currentArtistName;
-        }
+    try {
+      var duration = Long.parseLong(rawDuration) * 1000;
 
-        var coverIdentifier = item.get("album").get("cover").text();
-        var isrc = item.get("isrc").text();
+      var title = audio.get("title").text();
+      var originalUrl = audio.get("url").text();
+      var artistsArray = audio.get("artists");
+      var artistName = "";
 
-        var formattedCoverIdentifier = coverIdentifier.replaceAll("-", "/");
+      for (int i = 0; i < artistsArray.values().size(); i++) {
+        var currentArtistName = artistsArray.index(i).get("name").text();
+        artistName += (i > 0 ? ", " : "") + currentArtistName;
+      }
+      var coverIdentifier = audio.get("album").get("cover").text();
+      var isrc = audio.get("isrc").text();
 
-        var artworkUrl =
-          "https://resources.tidal.com/images/" +
-          formattedCoverIdentifier +
-          "/1280x1280.jpg";
+      var formattedCoverIdentifier = coverIdentifier.replaceAll("-", "/");
 
-        log.info("Track JSON: {}", item);
-
-        log.info(
-          "Parsed track: Title={}, Artist={}, Duration={}, OriginalUrl={}, ArtWorkURL={}, ID={}, ISRC={}",
+      var artworkUrl =
+        "https://resources.tidal.com/images/" +
+        formattedCoverIdentifier +
+        "/1280x1280.jpg";
+      return new TidalAudioTrack(
+        new AudioTrackInfo(
           title,
           artistName,
           duration,
+          id,
+          false,
           originalUrl,
           artworkUrl,
-          id,
           isrc
-        );
-
-        var audioTrack = new TidalAudioTrack(
-          new AudioTrackInfo(
-            title,
-            artistName,
-            duration,
-            id,
-            false,
-            originalUrl,
-            artworkUrl,
-            isrc
-          ),
-          this
-        );
-
-        log.info("Created AudioTrack: {}", audioTrack);
-        tracks.add(audioTrack);
-      } catch (NumberFormatException e) {
-        log.error(
-          "Error parsing duration for track. Track JSON: {}",
-          item.toString(),
-          e
-        );
-      }
+        ),
+        this
+      );
+    } catch (NumberFormatException e) {
+      log.error(
+        "Error parsing duration for track. Audio JSON: {}",
+        audio.toString(),
+        e
+      );
+      return null;
     }
-
-    return tracks;
   }
 
   @Override
