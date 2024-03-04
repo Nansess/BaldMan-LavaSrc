@@ -54,7 +54,7 @@ public class TidalSourceManager
     );
 
     private final HttpInterfaceManager httpInterfaceManager = HttpClientTools.createDefaultThreadLocalManager();
-    private int searchLimit = 6;
+    private int searchLimit = 7;
     private final String countryCode;
 
 
