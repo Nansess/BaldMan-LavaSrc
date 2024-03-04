@@ -233,7 +233,6 @@ public class TidalSourceManager
             var originalUrl = audio.get("url").text();
             var artistsArray = audio.get("artists");
             StringBuilder artistName = new StringBuilder();
-
             for (int i = 0; i < artistsArray.values().size(); i++) {
                 var currentArtistName = artistsArray.index(i).get("name").text();
                 artistName.append(i > 0 ? ", " : "").append(currentArtistName);
