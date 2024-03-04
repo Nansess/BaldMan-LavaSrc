@@ -602,15 +602,15 @@ public class SpotifySourceManager
   }
 
 private AudioTrack parseTrack(JsonBrowser json, boolean preview) {
-    var artistsArray = json.get("artists");
-    var artistName = "";
+var artistsArray = json.get("artists");
+List<String> artistNamesList = new ArrayList<>();
+for (int i = 0; i < artistsArray.values().size(); i++) {
+    var currentArtistName = artistsArray.index(i).get("name").text();
+    artistNamesList.add(currentArtistName);
+}
+var artistName = String.join(", ", artistNamesList);
 
-    for (int i = 0; i < artistsArray.values().size(); i++) {
-        var currentArtistName = artistsArray.index(i).get("name").text();
-        artistName += (i > 0 ? ", " : "") + currentArtistName;
-    }
 
-    // Creating an AudioTrackInfo object with all artists
     AudioTrackInfo trackInfo = new AudioTrackInfo(
         json.get("name").text(),
         artistName,
