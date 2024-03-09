@@ -10,6 +10,7 @@ BaldMan LavaSrc is a fork with a simple yet effective goal: provide an alternati
 - **Apple Music :**  without requiring an API key.
 - **Deezer :**  without requiring an Master key.
 - **Tidal :**  without requiring an API key.
+- **Slider Kz** (a mp3 website for songs, lacks artwork, and isrc)
 
 ## Upcoming Plans
 
@@ -34,6 +35,8 @@ plugins:
       deezer: false # Enable Deezer source
       yandexmusic: false # Enable Yandex Music source
       flowerytts: false # Enable Flowery TTs source
+      tidal: false
+      sliderkz: false
       youtube: true # Enable YouTube search source (https://github.com/topi314/LavaSearch)
     spotify:
       countryCode: "US" # the country code you want to use for filtering the artists top tracks. See https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
