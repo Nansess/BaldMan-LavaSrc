@@ -5,6 +5,7 @@ import com.github.topi314.lavasearch.api.SearchManagerConfiguration;
 import com.github.topi314.lavasrc.applemusic.AppleMusicSourceManager;
 import com.github.topi314.lavasrc.deezer.DeezerAudioSourceManager;
 import com.github.topi314.lavasrc.flowerytts.FloweryTTSSourceManager;
+import com.github.topi314.lavasrc.pandora.PandoraSourceManager;
 import com.github.topi314.lavasrc.sliderkz.SliderKzSourceManager;
 import com.github.topi314.lavasrc.spotify.SpotifySourceManager;
 import com.github.topi314.lavasrc.tidal.TidalSourceManager;
@@ -35,6 +36,7 @@ public class LavaSrcPlugin
   private FloweryTTSSourceManager flowerytts;
   private YoutubeSearchManager youtube;
   private SliderKzSourceManager sliderkz;
+  private PandoraSourceManager pandora;
   private TidalSourceManager tidal;
 
   public LavaSrcPlugin(
@@ -63,18 +65,17 @@ public class LavaSrcPlugin
         this.spotify.setAlbumPageLimit(spotifyConfig.getAlbumLoadLimit());
       }
     }
-if (sourcesConfig.isTidal()) {
-    this.tidal =
+    if (sourcesConfig.isTidal()) {
+      this.tidal =
         new TidalSourceManager(
-            pluginConfig.getProviders(),
-            tidalConfig.getCountryCode(),
-            unused -> manager
+          pluginConfig.getProviders(),
+          tidalConfig.getCountryCode(),
+          unused -> manager
         );
-    if (tidalConfig.getSearchLimit() > 0) {
+      if (tidalConfig.getSearchLimit() > 0) {
         this.tidal.setSearchLimit(tidalConfig.getSearchLimit());
+      }
     }
-}
-
     if (sourcesConfig.isAppleMusic()) {
       this.appleMusic =
         new AppleMusicSourceManager(
@@ -97,6 +98,14 @@ if (sourcesConfig.isTidal()) {
     }
     if (sourcesConfig.isSliderkz()) {
       this.sliderkz = new SliderKzSourceManager();
+    }
+    if (sourcesConfig.isPandora()) {
+      this.pandora =
+        new PandoraSourceManager(
+          pluginConfig.getProviders(),
+          PandoraConfig.getCountryCode(),
+          unused -> manager
+        );
     }
     if (sourcesConfig.isYandexMusic()) {
       this.yandexMusic =
@@ -134,6 +143,10 @@ if (sourcesConfig.isTidal()) {
     if (this.appleMusic != null) {
       log.info("Registering Apple Music audio source manager...");
       manager.registerSourceManager(this.appleMusic);
+    }
+    if (this.pandora != null) {
+      log.info("Registering Pandora audio source manager...");
+      manager.registerSourceManager(this.pandora);
     }
     if (this.deezer != null) {
       log.info("Registering Deezer audio source manager...");

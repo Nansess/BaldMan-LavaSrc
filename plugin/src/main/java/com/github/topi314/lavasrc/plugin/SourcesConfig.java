@@ -15,6 +15,8 @@ public class SourcesConfig {
   private boolean youtube = false;
   private boolean sliderkz = false;
   private boolean tidal = false;
+  private boolean pandora = false;
+
 
 
   public boolean isSpotify() {
@@ -30,6 +32,13 @@ public class SourcesConfig {
 
   public void setTidal(boolean tidal) {
     this.tidal = tidal;
+  }
+    public boolean isPandora() {
+    return this.pandora;
+  }
+
+  public void setPandora(boolean pandora) {
+    this.pandora = pandora;
   }
 
   public boolean isAppleMusic() {

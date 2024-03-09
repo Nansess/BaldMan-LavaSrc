@@ -62,12 +62,11 @@ public class LavaSrcTools {
         response.getEntity().getContent(),
         StandardCharsets.UTF_8
       );
-      log.debug(
-        "Response from '{}' was successful: {}",
-        request.getURI(),
-        data
-      );
       return JsonBrowser.parse(data);
     }
   }
+
+    public static Object fetchResponseAsJson(CloseableHttpResponse response) {
+        return null;
+    }
 }

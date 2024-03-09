@@ -12,6 +12,7 @@ import com.sedmelluq.discord.lavaplayer.tools.io.HttpClientTools;
 import com.sedmelluq.discord.lavaplayer.tools.io.HttpConfigurable;
 import com.sedmelluq.discord.lavaplayer.tools.io.HttpInterface;
 import com.sedmelluq.discord.lavaplayer.tools.io.HttpInterfaceManager;
+import org.apache.http.client.methods.HttpPost;
 import com.sedmelluq.discord.lavaplayer.track.*;
 import java.io.DataInput;
 import java.io.IOException;
