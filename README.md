@@ -9,6 +9,7 @@ BaldMan LavaSrc is a fork with a simple yet effective goal: provide an alternati
 - **Spotify :**  without the need for a client ID or secret.
 - **Apple Music :**  without requiring an API key.
 - **Deezer :**  without requiring an Master key.
+- **Tidal :**  without requiring an API key.
 
 ## Upcoming Plans
 
@@ -44,6 +45,8 @@ plugins:
       albumLoadLimit: 6 # The number of pages at 300 tracks each
     yandexmusic:
       accessToken: "your access token" # the token used for accessing the yandex music api. See https://github.com/TopiSenpai/LavaSrc#yandex-music
+    tidal:
+      countryCode: "US" 
     flowerytts:
       voice: "default voice" # (case-sensitive) get default voice here https://flowery.pw/docs/flowery/tts-voices-v-1-tts-voices-get
       translate: false # whether to translate the text to the native language of voice
