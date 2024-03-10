@@ -3,7 +3,7 @@ plugins {
     id "org.jetbrains.kotlin.jvm"
     id "org.jetbrains.kotlin.plugin.serialization"
 }
-archivesBaseName = "lavasrc"
+archivesBaseName = "baldman-lavasrc"
 
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
