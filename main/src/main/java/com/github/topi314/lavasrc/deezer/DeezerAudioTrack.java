@@ -179,7 +179,7 @@ public class DeezerAudioTrack extends ExtendedAudioTrack {
       if (this.isPreview) {
         if (this.previewUrl == null) {
           throw new FriendlyException(
-            "No preview url found",
+            "No preview for the url found",
             FriendlyException.Severity.COMMON,
             new IllegalArgumentException()
           );
