@@ -2,9 +2,9 @@ plugins {
     id "dev.arbjerg.lavalink.gradle-plugin" version "1.0.15"
 }
 
-archivesBaseName = "baldman-plugin-lavasrc"
+archivesBaseName = "baldman-plugin"
 lavalinkPlugin {
-    name = "baldman-plugin-lavasrc"
+    name = "baldman-plugin"
     apiVersion = "4.0.0"
     serverVersion = "4.0.0"
     configurePublishing = false
