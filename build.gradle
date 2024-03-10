@@ -40,9 +40,6 @@ def getGitVersion() {
     return [versionStr.toString().trim(), true]
 }
 
-var isMavenDefined = findProperty("MAVEN_USERNAME") != null && findProperty("MAVEN_PASSWORD") != null
-var isLavalinkMavenDefined = findProperty("LAVALINK_MAVEN_USERNAME") != null && findProperty("LAVALINK_MAVEN_PASSWORD") != null
-
 subprojects {
     apply plugin: "java"
     apply plugin: "maven-publish"
@@ -55,7 +52,6 @@ subprojects {
 
     publishing {
         repositories {
-
             System.out.println("Publishing to JitPack")
 
             maven {
