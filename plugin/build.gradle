@@ -2,9 +2,9 @@ plugins {
     id "dev.arbjerg.lavalink.gradle-plugin" version "1.0.15"
 }
 
-archivesBaseName = "lavasrc-plugin"
+archivesBaseName = "baldman-plugin-lavasrc"
 lavalinkPlugin {
-    name = "lavasrc-plugin"
+    name = "baldman-plugin-lavasrc"
     apiVersion = "4.0.0"
     serverVersion = "4.0.0"
     configurePublishing = false
@@ -24,6 +24,13 @@ publishing {
         maven(MavenPublication) {
             from components.java
             artifactId archivesBaseName
+        }
+    }
+
+    repositories {
+        maven {
+            name = "JitPack"
+            url = uri("https://jitpack.io")
         }
     }
 }
