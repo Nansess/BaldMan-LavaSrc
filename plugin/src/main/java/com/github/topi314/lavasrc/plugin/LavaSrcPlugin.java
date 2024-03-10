@@ -36,7 +36,6 @@ public class LavaSrcPlugin
   private FloweryTTSSourceManager flowerytts;
   private YoutubeSearchManager youtube;
   private SliderKzSourceManager sliderkz;
-  private PandoraSourceManager pandora;
   private TidalSourceManager tidal;
 
   public LavaSrcPlugin(
@@ -99,14 +98,6 @@ public class LavaSrcPlugin
     if (sourcesConfig.isSliderkz()) {
       this.sliderkz = new SliderKzSourceManager();
     }
-    if (sourcesConfig.isPandora()) {
-      this.pandora =
-        new PandoraSourceManager(
-          pluginConfig.getProviders(),
-          PandoraConfig.getCountryCode(),
-          unused -> manager
-        );
-    }
     if (sourcesConfig.isYandexMusic()) {
       this.yandexMusic =
         new YandexMusicSourceManager(yandexMusicConfig.getAccessToken());
@@ -143,10 +134,6 @@ public class LavaSrcPlugin
     if (this.appleMusic != null) {
       log.info("Registering Apple Music audio source manager...");
       manager.registerSourceManager(this.appleMusic);
-    }
-    if (this.pandora != null) {
-      log.info("Registering Pandora audio source manager...");
-      manager.registerSourceManager(this.pandora);
     }
     if (this.deezer != null) {
       log.info("Registering Deezer audio source manager...");
