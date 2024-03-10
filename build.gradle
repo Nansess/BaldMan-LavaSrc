@@ -2,9 +2,8 @@ plugins {
     id "org.jetbrains.kotlin.jvm" version "1.9.0" apply false
     id "org.jetbrains.kotlin.plugin.serialization" version "1.9.0" apply false
 }
-
 allprojects {
-    group = "com.github.nansess.baldman-lavasrc"
+    group = "com.github.topi314.lavasrc"
 
     repositories {
         mavenLocal()
@@ -30,6 +29,7 @@ def getGitVersion() {
         return [versionStr.toString().trim(), false]
     }
 
+
     versionStr = new ByteArrayOutputStream()
     exec {
         standardOutput versionStr
@@ -39,6 +39,9 @@ def getGitVersion() {
 
     return [versionStr.toString().trim(), true]
 }
+
+var isMavenDefined = findProperty("MAVEN_USERNAME") != null && findProperty("MAVEN_PASSWORD") != null
+var isLavalinkMavenDefined = findProperty("LAVALINK_MAVEN_USERNAME") != null && findProperty("LAVALINK_MAVEN_PASSWORD") != null
 
 subprojects {
     apply plugin: "java"
@@ -52,11 +55,35 @@ subprojects {
 
     publishing {
         repositories {
-            System.out.println("Publishing to JitPack")
+            if (isMavenDefined) {
+                System.out.println("Publishing to Maven Repo")
 
-            maven {
-                name = "JitPack"
-                url = "https://jitpack.io"
+                def snapshots = "https://maven.topi.wtf/snapshots"
+                def releases = "https://maven.topi.wtf/releases"
+
+                maven {
+                    name = "Reposilite"
+                    url = isSnapshot ? snapshots : releases
+                    credentials {
+                        username = findProperty("MAVEN_USERNAME")
+                        password = findProperty("MAVEN_PASSWORD")
+                    }
+
+                }
+            }
+            if (isLavalinkMavenDefined && name == "plugin") {
+                System.out.println("Publishing to Lavalink Maven Repo")
+                def lavalinkSnapshots = "https://maven.lavalink.dev/snapshots"
+                def lavalinkReleases = "https://maven.lavalink.dev/releases"
+
+                maven {
+                    name = "Reposilite-Lavalink"
+                    url = isSnapshot ? lavalinkSnapshots : lavalinkReleases
+                    credentials {
+                        username = findProperty("LAVALINK_MAVEN_USERNAME")
+                        password = findProperty("LAVALINK_MAVEN_PASSWORD")
+                    }
+                }
             }
         }
     }
