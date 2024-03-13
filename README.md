@@ -9,7 +9,8 @@ BaldMan LavaSrc is a fork with a simple yet effective goal: provide an alternati
 - **Spotify :**  without the need for a client ID or secret.
 - **Apple Music :**  without requiring an API key.
 - **Deezer :**  without requiring an Master key.
-
+- **Tidal :**  without requiring an key.
+- **Slider :**  a MP3 source that doesn't use YOUTUBE OR DEEZER
 ## Upcoming Plans
 
 - **Deezer ARL Support:** We're working on adding ARL support for Deezer, including plans for high-quality audio sourcing.
@@ -32,6 +33,8 @@ plugins:
       applemusic: false # Enable Apple Music source
       deezer: false # Enable Deezer source
       yandexmusic: false # Enable Yandex Music source
+      sliderkz: false
+      tidal: false
       flowerytts: false # Enable Flowery TTs source
       youtube: true # Enable YouTube search source (https://github.com/topi314/LavaSearch)
     spotify:
