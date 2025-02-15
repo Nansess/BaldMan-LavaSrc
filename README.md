@@ -5,17 +5,23 @@
 
 ## Purpose
 
-BaldMan LavaSrc is a fork with a simple yet effective goal: provide an alternative method to interact with audio sources like Spotify and Apple Music, Deezer without the hassle of managing API keys or master keys 
+BaldMan LavaSrc is a fork of the original LavaSrc project aimed at providing a simpler, plug-and-play experience when integrating audio sources like Spotify, Apple Music, Deezer, and Tidal into applications without the hassle of managing API keys.
+
+Since the creation of this fork, the original LavaSrc (located at [topi314/LavaSrc](https://github.com/topi314/LavaSrc)) has integrated some of the enhancements developed here, such as automatic extraction for Apple Music and Spotify. However, this fork does not include newer LavaSrc features like lyrics support and LavaSearch, as the focus remains on simplifying the user experience.
 
 > [!TIP]  
-> When using Spotify with this Fork, note that while the usual Spotify API enforces rate limits based on the application's client secret and ID, this fork uses anonymous tokens instead. This means you won't encounter rate limits due to client credentials, but keep in mind that you might still be rate limited by IP (429) if too many requests are sent. However, this method significantly increases the ability to accept Spotify links compared to using your client ID.
+> When using Spotify with this Fork, note that while the usual Spotify API enforces rate limits based on the application's client secret and ID, this fork uses anonymous tokens instead. This approach helps avoid rate limits tied to client credentials but be aware of potential IP rate limits.
 
 ## Key Features
 
-- **Spotify :**  without the need for a client ID or secret.
-- **Apple Music :**  without requiring an API key.
-- **Deezer :**  without requiring a Master key.
-- **Tidal :**  without requiring a key. (private API not public)
+- **Spotify**: Interact without the need for a client ID or secret.
+- **Apple Music**: Access without requiring an API key.
+- **Deezer**: Use without needing a Master key.
+- **Tidal**: Operate without requiring a key
+
+## Future of This Fork
+
+This fork will continue to support Tidal until such features are integrated into the main LavaSrc repository. After these integrations are complete, BaldMan LavaSrc will be phased out and archived, as the main repository will then cover all intended functionalities.
 
 ## Getting Started
 
