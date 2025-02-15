@@ -12,6 +12,9 @@ Since the creation of this fork, the original LavaSrc (located at [topi314/LavaS
 > [!TIP]  
 > When using Spotify with this Fork, note that while the usual Spotify API enforces rate limits based on the application's client secret and ID, this fork uses anonymous tokens instead. This approach helps avoid rate limits tied to client credentials but be aware of potential IP rate limits.
 
+[!TIP]
+This fork does not include newer LavaSrc features like lyrics support and LavaSearch.
+
 ## Key Features
 
 - **Spotify**: Interact without the need for a client ID or secret.
