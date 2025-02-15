@@ -10,10 +10,7 @@ BaldMan LavaSrc is a fork of the original LavaSrc project aimed at providing a s
 Since the creation of this fork, the original LavaSrc (located at [topi314/LavaSrc](https://github.com/topi314/LavaSrc)) has integrated some of the enhancements developed here, such as automatic extraction for Apple Music and Spotify. However, this fork does not include newer LavaSrc features like lyrics support and LavaSearch, as the focus remains on simplifying the user experience.
 
 > [!TIP]  
-> When using Spotify with this Fork, note that while the usual Spotify API enforces rate limits based on the application's client secret and ID, this fork uses anonymous tokens instead. This approach helps avoid rate limits tied to client credentials but be aware of potential IP rate limits.
-
-[!TIP]
-This fork does not include newer LavaSrc features like lyrics support and LavaSearch.
+> When using Spotify with this Fork, note that while the usual Spotify API enforces rate limits based on the application's client secret and ID, this fork uses anonymous tokens instead. This approach helps avoid rate limits tied to client credentials but be aware of potential IP rate limits. This fork does not include newer LavaSrc features like lyrics support and LavaSearch.
 
 ## Key Features
 
